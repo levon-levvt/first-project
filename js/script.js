@@ -102,49 +102,57 @@ function loop() {
     requestAnimationFrame(loop);
 }
 
-canvas.addEventListener('mousemove', e => {
-    const rect = canvas.getBoundingClientRect();
-    const nx = e.clientX - rect.left;
-    const ny = e.clientY - rect.top;
-    mouse.vx = nx - mouse.px;
-    mouse.vy = ny - mouse.py;
-    mouse.px = mouse.x;
-    mouse.py = mouse.y;
-    mouse.x = nx;
-    mouse.y = ny;
-});
-
 canvas.addEventListener('mouseleave', () => {
     mouse.x = -9999; mouse.y = -9999;
     mouse.vx = 0; mouse.vy = 0;
 });
 
-async function start() {
-    const res = await fetch('data/data.json');
-    const data = await res.json();
-    categories = data.categories;
+async function loadCategories() {
+    try {
+        const res = await fetch('data/data.json');
+        if (!res.ok) throw new Error('fetch failed');
+        const data = await res.json();
+        categories = data.categories;
 
-    const nav = document.getElementById('category-nav');
-    for (const [key, cat] of Object.entries(categories)) {
-        const btn = document.createElement('button');
-        btn.textContent = cat.label;
-        btn.dataset.key = key;
-        btn.style.setProperty('--cat-color', cat.color);
-        btn.addEventListener('click', () => {
-            if (activeCategory === key) {
-                activeCategory = null;
-                btn.classList.remove('active');
-            } else {
-                nav.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-                activeCategory = key;
-                btn.classList.add('active');
-            }
-        });
-        nav.appendChild(btn);
+        const nav = document.getElementById('category-nav');
+        for (const [key, cat] of Object.entries(categories)) {
+            const btn = document.createElement('button');
+            btn.textContent = cat.label;
+            btn.dataset.key = key;
+            btn.style.setProperty('--cat-color', cat.color);
+            btn.addEventListener('click', () => {
+                if (activeCategory === key) {
+                    activeCategory = null;
+                    btn.classList.remove('active');
+                } else {
+                    nav.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                    activeCategory = key;
+                    btn.classList.add('active');
+                }
+            });
+            nav.appendChild(btn);
+        }
+    } catch (_) {
+        // Dots werden trotzdem gezeichnet, Kategorien fehlen nur
     }
+}
 
+canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const nx = e.clientX - rect.left;
+    const ny = e.clientY - rect.top;
+    if (mouse.x !== -9999) {
+        mouse.vx = nx - mouse.x;
+        mouse.vy = ny - mouse.y;
+    }
+    mouse.x = nx;
+    mouse.y = ny;
+});
+
+async function start() {
     init();
     loop();
+    await loadCategories();
 }
 
 start();
