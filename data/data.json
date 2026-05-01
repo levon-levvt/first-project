@@ -1,30 +1,43 @@
 {
-  "projects": [
-    {
-      "id": 1,
-      "title": "Portfolio Website",
-      "description": "Meine erste Website mit HTML, CSS und JSON. Gebaut mit Claude.",
-      "technologies": ["HTML5", "CSS3", "JavaScript", "JSON"],
-      "url": "#"
+  "birthdate": "1991-06-28",
+  "lifespan": 100,
+  "categories": {
+    "schule": {
+      "label": "Schule",
+      "color": "#4A90E2",
+      "periods": [
+        { "start": "1997-09", "end": "2010-06", "note": "Grundschule & Gymnasium" }
+      ]
     },
-    {
-      "id": 2,
-      "title": "Projekt 2",
-      "description": "Ein spannendes Projekt das ich baue.",
-      "technologies": ["HTML5", "CSS3", "JavaScript"],
-      "url": "#"
+    "studium": {
+      "label": "Studium",
+      "color": "#A78BFA",
+      "periods": [
+        { "start": "2011-10", "end": "2017-03", "note": "Studium" }
+      ]
     },
-    {
-      "id": 3,
-      "title": "Projekt 3",
-      "description": "Noch ein Projekt zum Portfolio hinzufügen.",
-      "technologies": ["React", "JavaScript", "CSS"],
-      "url": "#"
+    "jobs": {
+      "label": "Jobs",
+      "color": "#F97316",
+      "periods": [
+        { "start": "2017-04", "end": "2026-05", "note": "Berufstätig" }
+      ]
+    },
+    "wohnort": {
+      "label": "Wohnort",
+      "color": "#34D399",
+      "periods": [
+        { "start": "1991-06", "end": "2011-09", "note": "Heimatstadt" },
+        { "start": "2011-10", "end": "2026-05", "note": "Aktuelle Stadt" }
+      ]
+    },
+    "urlaub": {
+      "label": "Urlaub",
+      "color": "#FBBF24",
+      "periods": [
+        { "start": "2015-07", "end": "2015-07", "note": "Urlaub" },
+        { "start": "2019-08", "end": "2019-08", "note": "Urlaub" }
+      ]
     }
-  ],
-  "about": {
-    "name": "Levon",
-    "email": "contact@levon.levvt.com",
-    "bio": "Web Developer und Lernender"
   }
 }
