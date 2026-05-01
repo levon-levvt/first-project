@@ -1,0 +1,17 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (falls später npm)
+node_modules/
+package-lock.json
+
+# Umgebung
+.env
+.env.local

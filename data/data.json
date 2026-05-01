@@ -1,0 +1,30 @@
+{
+  "projects": [
+    {
+      "id": 1,
+      "title": "Portfolio Website",
+      "description": "Meine erste Website mit HTML, CSS und JSON. Gebaut mit Claude.",
+      "technologies": ["HTML5", "CSS3", "JavaScript", "JSON"],
+      "url": "#"
+    },
+    {
+      "id": 2,
+      "title": "Projekt 2",
+      "description": "Ein spannendes Projekt das ich baue.",
+      "technologies": ["HTML5", "CSS3", "JavaScript"],
+      "url": "#"
+    },
+    {
+      "id": 3,
+      "title": "Projekt 3",
+      "description": "Noch ein Projekt zum Portfolio hinzufügen.",
+      "technologies": ["React", "JavaScript", "CSS"],
+      "url": "#"
+    }
+  ],
+  "about": {
+    "name": "Levon",
+    "email": "contact@levon.levvt.com",
+    "bio": "Web Developer und Lernender"
+  }
+}
