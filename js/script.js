@@ -1,158 +1,327 @@
-const canvas = document.getElementById('life-canvas');
-const ctx = canvas.getContext('2d');
+document.addEventListener("DOMContentLoaded", function () {
 
-const BIRTHDATE = new Date(1991, 5, 28);
-const TOTAL_MONTHS = 100 * 12;
-const COLS = 12;
-const ROWS = 100;
-const R = 3.5;
-const GAP = 16;
-const PAD_X = 48;
-const PAD_Y = 24;
+  // --- Konfiguration ---
+  const birthDate     = new Date(1991, 5, 28, 0, 0, 0);
+  const today         = new Date();
 
-// Wind physics
-const WIND_RADIUS = 90;
-const WIND_STRENGTH = 0.22;
-const DAMPING = 0.82;
-const SPRING = 0.08;
+  // --- Live-Counter ---
+  const counterEl = document.getElementById("life-counter");
+  function updateCounter() {
+    const seconds = Math.floor((new Date() - birthDate) / 1000);
+    counterEl.textContent = seconds.toLocaleString("de-DE");
+  }
+  updateCounter();
+  setInterval(updateCounter, 1000);
+  const lifeYears     = 90;
+  const bufferYears   = 1;
+  const monthsPerYear = 12;
 
-let dots = [];
-let categories = {};
-let activeCategory = null;
-let mouse = { x: -9999, y: -9999, vx: 0, vy: 0, px: -9999, py: -9999 };
+  const startOffset  = bufferYears * monthsPerYear;           // 12
+  const lifeMonths   = lifeYears * monthsPerYear;             // 1080
+  const endOffset    = startOffset + lifeMonths;              // 1092
+  const totalPoints  = (lifeYears + bufferYears * 2) * 12;   // 1104
 
-function monthsSinceBirth(date) {
-    return (date.getFullYear() - BIRTHDATE.getFullYear()) * 12
-        + (date.getMonth() - BIRTHDATE.getMonth());
-}
-
-function parseMonthStr(str) {
-    const [y, m] = str.split('-').map(Number);
-    return new Date(y, m - 1, 1);
-}
-
-function init() {
-    const w = PAD_X * 2 + (COLS - 1) * GAP;
-    const h = PAD_Y * 2 + (ROWS - 1) * GAP;
-    canvas.width = w;
-    canvas.height = h;
-
-    const now = new Date();
-    const currentIdx = monthsSinceBirth(now);
-
-    dots = [];
-    for (let i = 0; i < TOTAL_MONTHS; i++) {
-        const col = i % COLS;
-        const row = Math.floor(i / COLS);
-        const x = PAD_X + col * GAP;
-        const y = PAD_Y + row * GAP;
-        dots.push({ i, x, y, ox: x, oy: y, vx: 0, vy: 0, dx: 0, dy: 0,
-            past: i < currentIdx, current: i === currentIdx });
+  // --- Kategorien ---
+  const categories = [
+    {
+      name: "study",
+      color: "#3dff64",
+      events: [
+        { start: new Date(1996, 5, 28), end: new Date(2009, 5, 28), tooltip: "fachoberschulreife" },
+        { start: new Date(2009, 5, 28), end: new Date(2012, 5, 28), tooltip: "fachhochschulreife design" },
+        { start: new Date(2012, 5, 28), end: new Date(2021, 5, 28), tooltip: "bachelor of arts kommunikationsdesign" }
+      ]
+    },
+    {
+      name: "job",
+      color: "#0000ff",
+      events: [
+        { start: new Date(2015, 0, 1),  end: new Date(2016, 11, 31), tooltip: "startup: vielfalt" },
+        { start: new Date(2017, 2, 1),  end: new Date(2018, 4, 31),  tooltip: "startup: arody" },
+        { start: new Date(2021, 6, 28), end: today,                  tooltip: "learning experience design" }
+      ]
+    },
+    {
+      name: "places",
+      color: "#ff8c42",
+      events: [
+        { start: new Date(1991, 5, 28),  end: new Date(2012, 8, 18), tooltip: "mülheim an der ruhr" },
+        { start: new Date(2012, 8, 19),  end: new Date(2021, 5, 27), tooltip: "krefeld" },
+        { start: new Date(2021, 5, 28),  end: today,                 tooltip: "wuppertal" },
+        { start: new Date(2011, 8, 19),  end: new Date(2011, 9, 9),  tooltip: "tampere, finnland" },
+        { start: new Date(2015, 9, 1),   end: new Date(2016, 1, 5),  tooltip: "krakau, polen" },
+        { start: new Date(2017, 2, 1),   end: new Date(2018, 4, 31), tooltip: "augsburg, bayern" }
+      ]
+    },
+    {
+      name: "baseline",
+      color: "#7c7cff",
+      events: [
+        { startAge:  0, endAge:  3, tooltip: "frühe kindheit" },
+        { startAge:  3, endAge:  6, tooltip: "kindergarten" },
+        { startAge:  6, endAge: 16, tooltip: "schule" },
+        { startAge: 16, endAge: 30, tooltip: "ausbildung / studium" },
+        { startAge: 30, endAge: 67, tooltip: "karriere" },
+        { startAge: 67, endAge: 90, tooltip: "ruhestand" }
+      ]
     }
-}
+  ];
 
-function getDotColor(dot) {
-    if (activeCategory && categories[activeCategory]) {
-        const cat = categories[activeCategory];
-        for (const p of cat.periods) {
-            const s = monthsSinceBirth(parseMonthStr(p.start));
-            const e = monthsSinceBirth(parseMonthStr(p.end));
-            if (dot.i >= s && dot.i <= e) return cat.color;
+  // --- State ---
+  let activeCategoryIndex = -1;
+
+  const livedMonthsRaw =
+    (today.getFullYear() - birthDate.getFullYear()) * 12 +
+    (today.getMonth()   - birthDate.getMonth());
+
+  const livedMonths = Math.max(0, Math.min(startOffset + livedMonthsRaw, totalPoints));
+  const blinkIndex  = Math.max(0, Math.min(livedMonths - 1, totalPoints - 1));
+
+  const lifespanContainer        = document.getElementById("lifespan");
+  const categoryButtonsContainer = document.getElementById("category-buttons");
+
+  // --- Farb-Hilfsfunktionen ---
+  function hexToRgb(hex) {
+    const n = parseInt(hex.replace("#", ""), 16);
+    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+  }
+
+  function hexToRgba(hex, alpha) {
+    const { r, g, b } = hexToRgb(hex);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  function lightenColor(hex, amount) {
+    const { r, g, b } = hexToRgb(hex);
+    return {
+      r: Math.round(r + (255 - r) * amount),
+      g: Math.round(g + (255 - g) * amount),
+      b: Math.round(b + (255 - b) * amount)
+    };
+  }
+
+  function gradientColors(color, steps) {
+    if (steps <= 1) {
+      const { r, g, b } = hexToRgb(color);
+      return [`rgb(${r},${g},${b})`];
+    }
+    const end   = hexToRgb(color);
+    const start = lightenColor(color, 0.9);
+    return Array.from({ length: steps }, (_, i) => {
+      const t = i / (steps - 1);
+      const r = Math.round(start.r + (end.r - start.r) * t);
+      const g = Math.round(start.g + (end.g - start.g) * t);
+      const b = Math.round(start.b + (end.b - start.b) * t);
+      return `rgb(${r},${g},${b})`;
+    });
+  }
+
+  // --- Index-Hilfsfunktionen ---
+  function getMonthIndex(date) {
+    return (date.getFullYear() - birthDate.getFullYear()) * 12
+         + (date.getMonth()   - birthDate.getMonth());
+  }
+
+  function toIndex(date) {
+    return startOffset + getMonthIndex(date);
+  }
+
+  // --- Tooltip ---
+  function createTooltip(text, color) {
+    const t = document.createElement("div");
+    t.textContent = text;
+    Object.assign(t.style, {
+      position:    "absolute",
+      bottom:      "160%",
+      left:        "50%",
+      transform:   "translateX(-50%)",
+      background:  "white",
+      color:       "#000",
+      padding:     "5px 10px",
+      borderRadius:"6px",
+      whiteSpace:  "nowrap",
+      fontSize:    "12px",
+      visibility:  "hidden",
+      opacity:     "0",
+      pointerEvents:"none",
+      zIndex:      "9999",
+      boxShadow:   color
+                     ? `0px 4px 10px ${hexToRgba(color, 0.35)}`
+                     : "0px 4px 10px rgba(0,0,0,0.25)",
+      textTransform:"lowercase"
+    });
+    return t;
+  }
+
+  function clampTooltip(tooltip) {
+    const rect = tooltip.getBoundingClientRect();
+    const vw   = window.innerWidth;
+    if (rect.left < 0) {
+      tooltip.style.left      = "0";
+      tooltip.style.transform = "translateX(0)";
+    } else if (rect.right > vw) {
+      tooltip.style.left      = "auto";
+      tooltip.style.right     = "0";
+      tooltip.style.transform = "translateX(0)";
+    } else {
+      tooltip.style.left      = "50%";
+      tooltip.style.transform = "translateX(-50%)";
+    }
+  }
+
+  // --- Hintergrund-Glow ---
+  const bgGlow = document.getElementById("bg-glow");
+
+  function setBackgroundGlow(color) {
+    if (!bgGlow) return;
+    if (!color) {
+      bgGlow.style.background = "transparent";
+      return;
+    }
+    const { r, g, b } = hexToRgb(color);
+    bgGlow.style.background =
+      `radial-gradient(ellipse 80% 60% at 50% 0%, rgba(${r},${g},${b},0.12) 0%, transparent 70%)`;
+  }
+
+  // --- Buttons ---
+  categories.forEach((cat, index) => {
+    const btn = document.createElement("button");
+    btn.textContent = cat.name.toLowerCase();
+    Object.assign(btn.style, {
+      padding:         "5px 14px",
+      color:           cat.color,
+      border:          `1px solid ${hexToRgba(cat.color, 0.6)}`,
+      borderRadius:    "999px",
+      cursor:          "pointer",
+      outline:         "none",
+      transition:      "box-shadow 0.25s, background 0.25s",
+      fontSize:        "12px",
+      letterSpacing:   "0.04em",
+      textTransform:   "lowercase",
+      fontFamily:      "inherit"
+    });
+
+    btn.addEventListener("click", () => {
+      activeCategoryIndex = (activeCategoryIndex === index) ? -1 : index;
+      Array.from(categoryButtonsContainer.children).forEach(b => {
+        b.style.boxShadow = "none";
+      });
+      if (activeCategoryIndex === index) {
+        btn.style.boxShadow = `0 0 0 3px ${hexToRgba(cat.color, 0.2)}, 0 4px 12px ${hexToRgba(cat.color, 0.25)}`;
+        setBackgroundGlow(cat.color);
+      } else {
+        setBackgroundGlow(null);
+      }
+      buildGrid();
+    });
+
+    categoryButtonsContainer.appendChild(btn);
+  });
+
+  // --- Grid ---
+  function buildGrid() {
+    lifespanContainer.innerHTML = "";
+
+    const eventMap = {};
+
+    if (activeCategoryIndex >= 0) {
+      const cat        = categories[activeCategoryIndex];
+      const isBaseline = cat.name === "baseline";
+
+      cat.events.forEach((event, ei) => {
+        let startIdx, endIdx;
+
+        if (isBaseline) {
+          startIdx = startOffset + event.startAge * 12;
+          endIdx   = startOffset + event.endAge   * 12 - 1;
+        } else {
+          startIdx = toIndex(event.start);
+          endIdx   = toIndex(event.end);
         }
-    }
-    if (dot.current) return '#ffffff';
-    if (dot.past) return 'rgba(255,255,255,0.52)';
-    return 'rgba(255,255,255,0.07)';
-}
 
-function update() {
-    for (const d of dots) {
-        const cx = d.ox + d.dx;
-        const cy = d.oy + d.dy;
-        const dist = Math.hypot(cx - mouse.x, cy - mouse.y);
+        startIdx = Math.max(startIdx, startOffset);
+        endIdx   = Math.min(endIdx,   endOffset - 1);
 
-        if (dist < WIND_RADIUS && dist > 0) {
-            const strength = (1 - dist / WIND_RADIUS) * WIND_STRENGTH;
-            d.vx += mouse.vx * strength;
-            d.vy += mouse.vy * strength;
+        const cap = isBaseline
+          ? endOffset - 1
+          : Math.min(livedMonths - 1, endOffset - 1);
+        endIdx = Math.min(endIdx, cap);
+
+        const steps = endIdx - startIdx + 1;
+        if (steps <= 0) return;
+
+        const colors  = gradientColors(cat.color, steps);
+        const groupId = `event-${ei}`;
+
+        for (let i = startIdx; i <= endIdx; i++) {
+          eventMap[i] = { color: colors[i - startIdx], tooltip: event.tooltip, groupId };
         }
-
-        d.vx += -d.dx * SPRING;
-        d.vy += -d.dy * SPRING;
-        d.vx *= DAMPING;
-        d.vy *= DAMPING;
-        d.dx += d.vx;
-        d.dy += d.vy;
+      });
     }
-}
 
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (const d of dots) {
-        ctx.beginPath();
-        ctx.arc(d.ox + d.dx, d.oy + d.dy, R, 0, Math.PI * 2);
-        ctx.fillStyle = getDotColor(d);
-        ctx.fill();
+    for (let i = 0; i < totalPoints; i++) {
+      const point = document.createElement("div");
+
+      // Liminal-Zone
+      if (i < startOffset || i >= endOffset) {
+        point.className = "point liminal";
+        const t = createTooltip(i < startOffset ? "1 jahr vor dem leben" : "1 jahr nach dem leben");
+        point.appendChild(t);
+        point.addEventListener("mouseenter", () => {
+          t.style.visibility = "visible";
+          t.style.opacity    = "1";
+          clampTooltip(t);
+        });
+        point.addEventListener("mouseleave", () => {
+          t.style.visibility = "hidden";
+          t.style.opacity    = "0";
+        });
+        lifespanContainer.appendChild(point);
+        continue;
+      }
+
+      // Lebensbereich
+      point.className = "point";
+      const ev = eventMap[i];
+      point.style.backgroundColor = ev ? ev.color : (i < livedMonths ? "rgba(58,58,58,0.75)" : "rgba(58,58,58,0.14)");
+
+      if (i === blinkIndex) {
+        point.style.animation = "blink 1s infinite";
+      }
+
+      if (ev && activeCategoryIndex >= 0) {
+        const cat = categories[activeCategoryIndex];
+        point.dataset.groupId = ev.groupId;
+        point.style.cursor    = "pointer";
+
+        const t = createTooltip(ev.tooltip, cat.color);
+        point.appendChild(t);
+
+        point.addEventListener("mouseenter", () => {
+          lifespanContainer.querySelectorAll(`[data-group-id='${ev.groupId}']`).forEach(p => {
+            p.dataset.origBg     = p.style.backgroundColor;
+            p.dataset.origBorder = p.style.border;
+            p.style.backgroundColor = "transparent";
+            p.style.border          = `1px solid ${cat.color}`;
+          });
+          t.style.visibility = "visible";
+          t.style.opacity    = "1";
+          clampTooltip(t);
+        });
+
+        point.addEventListener("mouseleave", () => {
+          lifespanContainer.querySelectorAll(`[data-group-id='${ev.groupId}']`).forEach(p => {
+            p.style.backgroundColor = p.dataset.origBg     || "";
+            p.style.border          = p.dataset.origBorder || "";
+          });
+          t.style.visibility = "hidden";
+          t.style.opacity    = "0";
+        });
+      }
+
+      lifespanContainer.appendChild(point);
     }
-}
+  }
 
-function loop() {
-    update();
-    draw();
-    requestAnimationFrame(loop);
-}
-
-canvas.addEventListener('mouseleave', () => {
-    mouse.x = -9999; mouse.y = -9999;
-    mouse.vx = 0; mouse.vy = 0;
+  buildGrid();
 });
-
-async function loadCategories() {
-    try {
-        const res = await fetch('data/data.json');
-        if (!res.ok) throw new Error('fetch failed');
-        const data = await res.json();
-        categories = data.categories;
-
-        const nav = document.getElementById('category-nav');
-        for (const [key, cat] of Object.entries(categories)) {
-            const btn = document.createElement('button');
-            btn.textContent = cat.label;
-            btn.dataset.key = key;
-            btn.style.setProperty('--cat-color', cat.color);
-            btn.addEventListener('click', () => {
-                if (activeCategory === key) {
-                    activeCategory = null;
-                    btn.classList.remove('active');
-                } else {
-                    nav.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-                    activeCategory = key;
-                    btn.classList.add('active');
-                }
-            });
-            nav.appendChild(btn);
-        }
-    } catch (_) {
-        // Dots werden trotzdem gezeichnet, Kategorien fehlen nur
-    }
-}
-
-canvas.addEventListener('mousemove', e => {
-    const rect = canvas.getBoundingClientRect();
-    const nx = e.clientX - rect.left;
-    const ny = e.clientY - rect.top;
-    if (mouse.x !== -9999) {
-        mouse.vx = nx - mouse.x;
-        mouse.vy = ny - mouse.y;
-    }
-    mouse.x = nx;
-    mouse.y = ny;
-});
-
-async function start() {
-    init();
-    loop();
-    await loadCategories();
-}
-
-start();

@@ -1,71 +1,264 @@
+/* ─── Reset ─── */
 *, *::before, *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* ─── Tokens ─── */
 :root {
-    --bg: #0d0d0d;
-    --dot-past: rgba(255, 255, 255, 0.55);
-    --dot-future: rgba(255, 255, 255, 0.08);
-    --dot-current: #ffffff;
-    --nav-height: 56px;
+    --bg:      #ebebea;
+    --text:    #3a3a3a;
+    --muted:   #3a3a3a;
+    --grid-w:  762px;
+    --fs:      13px;
 }
 
+/* ─── Body ─── */
 body {
-    background: var(--bg);
     min-height: 100vh;
+    background: var(--bg);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: var(--fs);
+    color: var(--text);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-#category-nav {
+/* ─── Grain ─── */
+.grain {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: var(--nav-height);
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    mix-blend-mode: overlay;
+}
+
+/* ─── Glow ─── */
+.bg-glow {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    transition: background 0.9s ease;
+}
+
+/* ─── Content ─── */
+.content {
+    position: relative;
+    z-index: 1;
+    width: var(--grid-w);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 52px 0 40px;
+    gap: 36px;
+}
+
+/* ══════════════════════════════
+   OBERER BLOCK: Profil + Buttons
+══════════════════════════════ */
+.top-section {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+/* ─── Profil (zentriert) ─── */
+.profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.avatar-wrap {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(58,58,58,0.08);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+}
+
+.avatar-wrap.avatar-fallback {
+    background: rgba(58,58,58,0.06);
+}
+
+.avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.username {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+}
+
+/* Counter – gleiche Größe wie Fließtext */
+.counter-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    color: var(--text);
+}
+
+#life-counter {
+    font-size: var(--fs);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+}
+
+.counter-label {
+    font-size: var(--fs);
+    opacity: 0.6;
+}
+
+/* Bio – gleiche Größe und Farbe wie restlicher Text */
+.bio {
+    font-size: var(--fs);
+    color: var(--text);
+    line-height: 1.6;
+    max-width: 320px;
+}
+
+/* Social Links */
+.social-links {
+    display: flex;
+    gap: 8px;
+}
+
+.social-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(58,58,58,0.1);
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--text);
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.social-btn:hover {
+    background: rgba(255,255,255,0.9);
+    transform: translateY(-1px);
+}
+
+/* ─── Kategorie-Buttons (rechts, top-aligned) ─── */
+#category-buttons {
+    display: flex;
+    flex-direction: column;
     gap: 8px;
-    z-index: 10;
-    background: linear-gradient(to bottom, #0d0d0d 60%, transparent);
+    flex-shrink: 0;
+    padding-top: 2px;
 }
 
-#category-nav button {
-    background: none;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.4);
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.2s ease;
+#category-buttons button {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255,255,255,0.45) !important;
+    transition: box-shadow 0.25s, background 0.25s !important;
 }
 
-#category-nav button:hover {
-    border-color: rgba(255, 255, 255, 0.4);
-    color: rgba(255, 255, 255, 0.7);
+#category-buttons button:hover {
+    background: rgba(255,255,255,0.75) !important;
 }
 
-#category-nav button.active {
-    border-color: var(--cat-color);
-    color: var(--cat-color);
-    box-shadow: 0 0 12px -2px var(--cat-color);
-}
-
-main {
-    padding-top: calc(var(--nav-height) + 32px);
-    padding-bottom: 48px;
+/* ══════════════════════════════
+   DOT GRID
+══════════════════════════════ */
+#lifespan-wrap {
     display: flex;
     justify-content: center;
 }
 
-canvas {
-    display: block;
-    cursor: none;
+#lifespan {
+    display: grid;
+    grid-template-columns: repeat(48, 10px);
+    gap: 6px;
+}
+
+.point {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.liminal {
+    width: 8px;
+    height: 8px;
+    background: transparent;
+    border: 1px dashed rgba(58,58,58,0.2);
+    cursor: pointer;
+}
+
+/* ══════════════════════════════
+   FOOTER
+══════════════════════════════ */
+.site-footer {
+    position: relative;
+    z-index: 1;
+    padding: 16px 0 28px;
+    font-size: 12px;
+    color: rgba(58,58,58,0.45);
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.footer-dot { font-size: 8px; }
+
+/* ─── Blink ─── */
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.2; }
+}
+
+/* ══════════════════════════════
+   MOBILE
+══════════════════════════════ */
+@media (max-width: 800px) {
+    :root { --grid-w: 100%; }
+
+    .content {
+        padding: 32px 16px 32px;
+        gap: 28px;
+    }
+
+    .top-section {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #category-buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    #lifespan {
+        grid-template-columns: repeat(24, 10px);
+    }
 }
