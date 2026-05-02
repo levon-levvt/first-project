@@ -7,11 +7,12 @@
 
 /* ─── Tokens ─── */
 :root {
-    --bg:      #ebebea;
+    --bg:      #e8e8e7;
+    --card:    rgba(255, 255, 255, 0.42);
     --text:    #3a3a3a;
-    --muted:   #3a3a3a;
-    --grid-w:  762px;
     --fs:      13px;
+    --radius:  20px;
+    --grid-w:  762px;
 }
 
 /* ─── Body ─── */
@@ -55,44 +56,36 @@ body {
     width: var(--grid-w);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 52px 0 40px;
-    gap: 36px;
+    padding: 48px 0 32px;
+    gap: 12px;
 }
 
 /* ══════════════════════════════
-   OBERER BLOCK: Profil + Buttons
+   PROFIL CARD
 ══════════════════════════════ */
-.top-section {
-    width: 100%;
+.profile-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 24px;
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 24px;
-}
-
-/* ─── Profil (zentriert) ─── */
-.profile {
-    display: flex;
-    flex-direction: column;
     align-items: center;
-    text-align: center;
-    gap: 10px;
-    flex: 1;
+    gap: 20px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
+/* Avatar */
 .avatar-wrap {
-    width: 96px;
-    height: 96px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
-    background: rgba(58,58,58,0.08);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    background: rgba(58,58,58,0.1);
 }
 
 .avatar-wrap.avatar-fallback {
-    background: rgba(58,58,58,0.06);
+    background: rgba(58,58,58,0.08);
 }
 
 .avatar {
@@ -101,94 +94,76 @@ body {
     object-fit: cover;
 }
 
+/* Infos rechts */
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 .username {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     letter-spacing: -0.02em;
     color: var(--text);
 }
 
-/* Counter – gleiche Größe wie Fließtext */
 .counter-wrap {
     display: flex;
     align-items: baseline;
-    gap: 5px;
+    gap: 4px;
     color: var(--text);
 }
 
 #life-counter {
     font-size: var(--fs);
-    font-weight: 500;
+    font-weight: 400;
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.01em;
 }
 
 .counter-label {
     font-size: var(--fs);
-    opacity: 0.6;
+    opacity: 0.7;
 }
 
-/* Bio – gleiche Größe und Farbe wie restlicher Text */
 .bio {
     font-size: var(--fs);
     color: var(--text);
-    line-height: 1.6;
-    max-width: 320px;
+    line-height: 1.55;
+    margin-top: 2px;
 }
 
 /* Social Links */
 .social-links {
     display: flex;
-    gap: 8px;
+    gap: 10px;
+    margin-top: 6px;
 }
 
 .social-btn {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.55);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(58,58,58,0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     color: var(--text);
     text-decoration: none;
-    transition: background 0.2s, transform 0.15s;
+    opacity: 0.75;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
 }
 
 .social-btn:hover {
-    background: rgba(255,255,255,0.9);
-    transform: translateY(-1px);
-}
-
-/* ─── Kategorie-Buttons (rechts, top-aligned) ─── */
-#category-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    flex-shrink: 0;
-    padding-top: 2px;
-}
-
-#category-buttons button {
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    background: rgba(255,255,255,0.45) !important;
-    transition: box-shadow 0.25s, background 0.25s !important;
-}
-
-#category-buttons button:hover {
-    background: rgba(255,255,255,0.75) !important;
+    opacity: 1;
 }
 
 /* ══════════════════════════════
-   DOT GRID
+   GRID CARD
 ══════════════════════════════ */
-#lifespan-wrap {
+.grid-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
     display: flex;
     justify-content: center;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 #lifespan {
@@ -197,6 +172,7 @@ body {
     gap: 6px;
 }
 
+/* ─── Punkte ─── */
 .point {
     width: 10px;
     height: 10px;
@@ -214,21 +190,56 @@ body {
 }
 
 /* ══════════════════════════════
+   KATEGORIE-BUTTONS
+══════════════════════════════ */
+#category-buttons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+#category-buttons button {
+    background: transparent !important;
+    border: 1px solid rgba(58,58,58,0.25) !important;
+    border-radius: 999px !important;
+    padding: 6px 16px !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.07em !important;
+    text-transform: uppercase !important;
+    color: var(--text) !important;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s !important;
+    font-family: inherit !important;
+}
+
+#category-buttons button:hover {
+    background: rgba(255,255,255,0.5) !important;
+    border-color: rgba(58,58,58,0.4) !important;
+}
+
+/* ══════════════════════════════
    FOOTER
 ══════════════════════════════ */
 .site-footer {
     position: relative;
     z-index: 1;
-    padding: 16px 0 28px;
+    padding: 20px 0 32px;
     font-size: 12px;
-    color: rgba(58,58,58,0.45);
+    color: rgba(58,58,58,0.5);
     letter-spacing: 0.02em;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
 }
 
-.footer-dot { font-size: 8px; }
+.footer-dots {
+    font-size: 7px;
+    letter-spacing: 2px;
+    color: rgba(58,58,58,0.6);
+}
 
 /* ─── Blink ─── */
 @keyframes blink {
@@ -243,22 +254,19 @@ body {
     :root { --grid-w: 100%; }
 
     .content {
-        padding: 32px 16px 32px;
-        gap: 28px;
-    }
-
-    .top-section {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    #category-buttons {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
+        padding: 24px 14px 24px;
     }
 
     #lifespan {
         grid-template-columns: repeat(24, 10px);
+    }
+
+    .profile-card {
+        align-items: flex-start;
+    }
+
+    .avatar-wrap {
+        width: 64px;
+        height: 64px;
     }
 }
