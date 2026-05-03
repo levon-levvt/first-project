@@ -248,25 +248,73 @@ body {
 }
 
 /* ══════════════════════════════
-   MOBILE
+   MOBILE: kein Card-Layout, alles flach & zentriert
 ══════════════════════════════ */
 @media (max-width: 800px) {
     :root { --grid-w: 100%; }
 
     .content {
-        padding: 24px 14px 24px;
+        padding: 32px 16px 24px;
+        gap: 28px;
+        align-items: center;
+    }
+
+    /* Profil: Cards weg, vertikal zentriert */
+    .profile-card {
+        background: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        padding: 0;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .avatar-wrap {
+        width: 96px;
+        height: 96px;
+    }
+
+    .profile-info {
+        align-items: center;
+        gap: 6px;
+    }
+
+    .username {
+        font-size: 15px;
+    }
+
+    .counter-wrap {
+        justify-content: center;
+    }
+
+    .bio {
+        max-width: 320px;
+        line-height: 1.55;
+    }
+
+    .social-links {
+        justify-content: center;
+        gap: 14px;
+        margin-top: 4px;
+    }
+
+    /* Grid: Cards weg */
+    .grid-card {
+        background: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        padding: 0;
     }
 
     #lifespan {
         grid-template-columns: repeat(24, 10px);
     }
 
-    .profile-card {
-        align-items: flex-start;
-    }
-
-    .avatar-wrap {
-        width: 64px;
-        height: 64px;
+    /* Buttons zentriert */
+    #category-buttons {
+        justify-content: center;
+        padding: 0;
     }
 }
