@@ -7,12 +7,14 @@
 
 /* ─── Tokens ─── */
 :root {
-    --bg:      #e8e8e7;
-    --card:    rgba(255, 255, 255, 0.42);
-    --text:    #3a3a3a;
-    --fs:      13px;
-    --radius:  20px;
-    --grid-w:  762px;
+    --bg:           #e8e8e7;
+    --card:         rgba(255, 255, 255, 0.45);
+    --text:         #3a3a3a;
+    --fs:           13px;
+    --radius:       20px;
+    --grid-w:       762px;   /* 48 × 10px + 47 × 6px */
+    --container-w:  802px;   /* Grid + 2×20 Card-Padding */
+    --profile-w:    560px;   /* schmaler als Grid-Card */
 }
 
 /* ─── Body ─── */
@@ -53,31 +55,34 @@ body {
 .content {
     position: relative;
     z-index: 1;
-    width: var(--grid-w);
+    width: var(--container-w);
     display: flex;
     flex-direction: column;
     padding: 48px 0 32px;
-    gap: 12px;
+    gap: 16px;
 }
 
 /* ══════════════════════════════
    PROFIL CARD
 ══════════════════════════════ */
 .profile-card {
+    max-width: var(--profile-w);
+    width: 100%;
+    margin: 0 auto;
     background: var(--card);
     border-radius: var(--radius);
-    padding: 20px 24px;
+    padding: 18px 22px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 18px;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
 
-/* Avatar */
+/* Avatar 100×100px */
 .avatar-wrap {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
@@ -99,6 +104,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    min-width: 0;
+    flex: 1;
 }
 
 .username {
@@ -123,40 +130,60 @@ body {
 
 .counter-label {
     font-size: var(--fs);
-    opacity: 0.7;
+    opacity: 0.55;
 }
 
 .bio {
     font-size: var(--fs);
     color: var(--text);
-    line-height: 1.55;
+    line-height: 1.5;
     margin-top: 2px;
 }
 
-/* Social Links */
-.social-links {
+/* ══════════════════════════════
+   KATEGORIE-BUTTONS (über Grid)
+══════════════════════════════ */
+#category-buttons {
     display: flex;
-    gap: 10px;
-    margin-top: 6px;
+    flex-direction: row;
+    gap: 8px;
+    padding: 4px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
 }
 
-.social-btn {
-    color: var(--text);
-    text-decoration: none;
-    opacity: 0.75;
-    transition: opacity 0.2s;
-    display: flex;
-    align-items: center;
+#category-buttons::-webkit-scrollbar {
+    display: none;
 }
 
-.social-btn:hover {
-    opacity: 1;
+#category-buttons button {
+    background: transparent !important;
+    border: 1px solid rgba(58,58,58,0.25) !important;
+    border-radius: 999px !important;
+    padding: 7px 16px !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.07em !important;
+    text-transform: uppercase !important;
+    color: var(--text) !important;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s !important;
+    font-family: inherit !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+#category-buttons button:hover {
+    background: rgba(255,255,255,0.5) !important;
+    border-color: rgba(58,58,58,0.4) !important;
 }
 
 /* ══════════════════════════════
    GRID CARD
 ══════════════════════════════ */
 .grid-card {
+    width: 100%;
     background: var(--card);
     border-radius: var(--radius);
     padding: 20px;
@@ -190,37 +217,6 @@ body {
 }
 
 /* ══════════════════════════════
-   KATEGORIE-BUTTONS
-══════════════════════════════ */
-#category-buttons {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 4px 0;
-}
-
-#category-buttons button {
-    background: transparent !important;
-    border: 1px solid rgba(58,58,58,0.25) !important;
-    border-radius: 999px !important;
-    padding: 6px 16px !important;
-    font-size: 11px !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.07em !important;
-    text-transform: uppercase !important;
-    color: var(--text) !important;
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s !important;
-    font-family: inherit !important;
-}
-
-#category-buttons button:hover {
-    background: rgba(255,255,255,0.5) !important;
-    border-color: rgba(58,58,58,0.4) !important;
-}
-
-/* ══════════════════════════════
    FOOTER
 ══════════════════════════════ */
 .site-footer {
@@ -248,59 +244,29 @@ body {
 }
 
 /* ══════════════════════════════
-   MOBILE: kein Card-Layout, alles flach & zentriert
+   MOBILE: keine Cards, alles flach
+   Profile-Layout BLEIBT (Foto links, Text rechts)
 ══════════════════════════════ */
 @media (max-width: 800px) {
-    :root { --grid-w: 100%; }
-
-    .content {
-        padding: 32px 16px 24px;
-        gap: 28px;
-        align-items: center;
+    :root {
+        --container-w: 100%;
+        --profile-w:   100%;
     }
 
-    /* Profil: Cards weg, vertikal zentriert */
+    .content {
+        padding: 28px 16px 24px;
+        gap: 24px;
+    }
+
+    /* Profil-Card: kein BG, kein Padding, aber Layout bleibt */
     .profile-card {
         background: transparent;
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         padding: 0;
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-        text-align: center;
     }
 
-    .avatar-wrap {
-        width: 96px;
-        height: 96px;
-    }
-
-    .profile-info {
-        align-items: center;
-        gap: 6px;
-    }
-
-    .username {
-        font-size: 15px;
-    }
-
-    .counter-wrap {
-        justify-content: center;
-    }
-
-    .bio {
-        max-width: 320px;
-        line-height: 1.55;
-    }
-
-    .social-links {
-        justify-content: center;
-        gap: 14px;
-        margin-top: 4px;
-    }
-
-    /* Grid: Cards weg */
+    /* Grid-Card: kein BG, kein Padding */
     .grid-card {
         background: transparent;
         backdrop-filter: none;
@@ -308,13 +274,19 @@ body {
         padding: 0;
     }
 
+    /* Mobile: kompakteres Grid (24 Spalten, kleinere Punkte) */
     #lifespan {
-        grid-template-columns: repeat(24, 10px);
+        grid-template-columns: repeat(24, 8px);
+        gap: 5px;
     }
 
-    /* Buttons zentriert */
-    #category-buttons {
-        justify-content: center;
-        padding: 0;
+    .point {
+        width: 8px;
+        height: 8px;
+    }
+
+    .liminal {
+        width: 6px;
+        height: 6px;
     }
 }
